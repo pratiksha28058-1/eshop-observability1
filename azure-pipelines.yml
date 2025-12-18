@@ -1,0 +1,52 @@
+trigger:
+- main
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+variables:
+  buildConfiguration: 'Release'
+  artifactName: 'drop'
+  zipName: 'webapp.zip'
+
+steps:
+# ---------------------------------------
+# Install .NET SDK
+# ---------------------------------------
+- task: UseDotNet@2
+  displayName: 'Use .NET SDK'
+  inputs:
+    packageType: 'sdk'
+    version: '8.0.x'
+
+# ---------------------------------------
+# Restore, Build, Publish
+# ---------------------------------------
+- script: |
+    dotnet restore
+    dotnet build --configuration $(buildConfiguration)
+    dotnet publish src/Web/Web.csproj \
+      --configuration $(buildConfiguration) \
+      --output $(Build.BinariesDirectory)
+  displayName: 'Build & Publish ASP.NET app'
+
+# ---------------------------------------
+# Archive published output into ZIP
+# ---------------------------------------
+- task: ArchiveFiles@2
+  displayName: 'Archive published app into ZIP'
+  inputs:
+    rootFolderOrFile: '$(Build.BinariesDirectory)'
+    includeRootFolder: false
+    archiveType: 'zip'
+    archiveFile: '$(Build.ArtifactStagingDirectory)/$(zipName)'
+    replaceExistingArchive: true
+
+# ---------------------------------------
+# Publish ZIP artifact
+# ---------------------------------------
+- task: PublishBuildArtifacts@1
+  displayName: 'Publish Artifact: drop'
+  inputs:
+    PathtoPublish: '$(Build.ArtifactStagingDirectory)/$(zipName)'
+    ArtifactName: '$(artifactName)'
