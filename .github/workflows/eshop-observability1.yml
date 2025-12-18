@@ -1,0 +1,35 @@
+name: DemoAppp/eshop-observability1
+on:
+  push:
+    branches:
+    - main
+env:
+  artifactName: drop
+  buildConfiguration: Release
+  zipName: webapp.zip
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: checkout
+      uses: actions/checkout@v4.1.0
+    - name: Use .NET SDK
+      uses: actions/setup-dotnet@v4.0.0
+      with:
+        dotnet-version: 8.0.x
+    - name: Build & Publish ASP.NET app
+      run: |-
+        dotnet restore
+        dotnet build --configuration ${{ env.buildConfiguration }}
+        dotnet publish src/Web/Web.csproj \
+          --configuration ${{ env.buildConfiguration }} \
+          --output ${{ github.workspace }}
+    - name: Create ZIP Artifact
+      run: |
+        echo "Zipping the build output...Migrated using custom transformer"
+        zip -r ${{ runner.temp }}/${{ env.zipName }} ${{ github.workspace }} -x *.git* node_modules/*
+    - name: Upload Artifact ${{ env.artifactName }}
+      uses: actions/upload-artifact@v4
+      with:
+        name: "${{ env.artifactName }}"
+        path: "${{ runner.temp }}/${{ env.zipName }}"
