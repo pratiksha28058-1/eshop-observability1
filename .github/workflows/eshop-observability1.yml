@@ -11,7 +11,7 @@ env:
 jobs:
   build:
     steps:
-    - uses: actions/checkout@v4.1.0
+    - uses: actions/checkout@v6.0.1
       name: checkout
     - uses: actions/setup-dotnet@v4.0.0
       with:
