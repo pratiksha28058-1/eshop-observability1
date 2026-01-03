@@ -24,7 +24,7 @@ jobs:
         echo "Zipping the build output..."
         zip -r ${{ runner.temp }}/${{ env.zipName }} ${{ github.workspace }} -x *.git* node_modules/*
       name: Create ZIP Artifact
-    - uses: actions/upload-artifact@v4
+    - uses: actions/upload-artifact@v6
       with:
         path: ${{ runner.temp }}/${{ env.zipName }}
         name: ${{ env.artifactName }}
